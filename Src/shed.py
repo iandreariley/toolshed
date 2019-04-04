@@ -12,7 +12,7 @@ tool_rack = the_shed.table('tools')
 
 def put(tool: tools.Tool):
     tool_spot = Query()
-    tool_rack.upsert(tool.to_json(), tool_spot.script == tool.script)
+    tool_rack.upsert(tool.to_dict(), tool_spot.script == tool.script)
 
 
 def take(script):

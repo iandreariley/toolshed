@@ -20,6 +20,25 @@ class Tool:
         self._invoke_from = invoke_from or shed.HOME
         self.tags = tags or []
 
+    def invoke(self, args):
+        """Invokes the tool in a subprocess with the given args."""
+
+        try:
+            os.chdir(self._invoke_from)
+        except FileNotFoundError as e:
+            raise exceptions.InvokeDirectoryNotFound() from e
+
+        script_path = os.path.join(shed.HOME, self._script)
+        return script_handlers.handle_output(subprocess.run([self.invocation, script_path] + args.split(' ')))
+
+    def to_dict(self):
+        return {
+            'invoke_from': self._invoke_from,
+            'script': self._script,
+            'invocation': self.invocation,
+            'tags': self.tags
+        }
+
     @property
     def invoke_from(self):
         return self._invoke_from
@@ -39,22 +58,6 @@ class Tool:
         if not os.path.exists(os.path.join(shed.HOME, script)):
             raise exceptions.ScriptNotFound()
         self._script = script
-
-    def invoke(self, args):
-        try:
-            os.chdir(self._invoke_from)
-        except FileNotFoundError as e:
-            raise exceptions.InvokeDirectoryNotFound() from e
-
-        script_path = os.path.join(shed.HOME, self._script)
-        return script_handlers.handle_output(subprocess.run([self.invocation, script_path] + args.split(' ')))
-
-    def to_json(self):
-        return {
-            'invoke_from': self._invoke_from,
-            'script': self._script,
-            'invocation': self.invocation
-        }
 
     @staticmethod
     def from_json(json_object=str):
