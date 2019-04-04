@@ -23,7 +23,7 @@ logger.addHandler(handler)
 
 
 parser = argparse.ArgumentParser("A cool place to store your tools out of the hot sun.")
-parser.add_argument('action', help=pprint.pprint(actions), choices=['add', 'use', 'mod', 'toss'])
+parser.add_argument('action', help=pprint.pformat(actions), choices=['add', 'use', 'mod', 'toss'])
 known_args, unknown_args = parser.parse_known_args()
 command_dispatcher(sys.argv[1:])
 
