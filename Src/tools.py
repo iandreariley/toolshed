@@ -14,7 +14,7 @@ logger = logging.getLogger("project")
 
 class Tool:
 
-    def __init__(self, script, invocation, invoke_from=None, tags=None):
+    def __init__(self, script, invocation=None, invoke_from=None, tags=None):
         self._script = script
         self.invocation = invocation
         self._invoke_from = invoke_from or shed.HOME
@@ -63,8 +63,9 @@ class Tool:
     def from_json(json_object=str):
         members = json.loads(json_object)
 
-        invocation = members.get('invocation', None)
-        script = members.get('script', None)
-        invoke_from = members.get('invoke_from', None)
-
-        return Tool(script, invocation, invoke_from)
+        return Tool(
+            members.get('invocation', None),
+            members.get('script', None),
+            members.get('invoke_from', None),
+            members.get('tags', None)
+        )
