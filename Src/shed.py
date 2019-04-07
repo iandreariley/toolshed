@@ -23,7 +23,7 @@ def take(script):
         raise exceptions.DuplicateTool()
 
     try:
-        return results[0]
+        return tools.Tool.from_json(results[0])
     except IndexError:
         return None
 
