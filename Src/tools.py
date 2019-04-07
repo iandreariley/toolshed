@@ -29,7 +29,11 @@ class Tool:
             raise exceptions.InvokeDirectoryNotFound() from e
 
         script_path = os.path.join(shed.HOME, self._script)
-        return script_handlers.handle_output(subprocess.run([self.invocation, script_path] + args.split(' ')))
+
+        if not os.path.isfile(script_path):
+            raise exceptions.ScriptNotFound()
+
+        return script_handlers.handle_output(subprocess.run([self.invocation, script_path] + args))
 
     def to_dict(self):
         return {
@@ -60,12 +64,11 @@ class Tool:
         self._script = script
 
     @staticmethod
-    def from_json(json_object=str):
-        members = json.loads(json_object)
+    def from_json(members):
 
         return Tool(
-            members.get('invocation', None),
-            members.get('script', None),
-            members.get('invoke_from', None),
-            members.get('tags', None)
+            members['script'],
+            members['invocation'],
+            members['invoke_from'],
+            members['tags']
         )
