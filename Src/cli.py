@@ -43,13 +43,14 @@ def _(use_args):
 def _(mod_args):
     mod_parser = argparse.ArgumentParser("Modify a tool.")
     mod_parser.add_argument("script", help="Tool to modify.")
+    mod_parser.add_argument("-u", "--text", help="Path of file to replace the existing script with.")
     mod_parser.add_argument("-t", "--tags", nargs="+", help="Add tags to tool.")
     mod_parser.add_argument("-i", "--invocation", help="Change invocation.")
     mod_parser.add_argument("-r", "--remove_tags", nargs="+", help="Remove tags from tool.")
     mod_parser.add_argument("-c", "--clear-tags", action="store_true", default=False, help="Remove all tags.")
     mod_parser.add_argument("-d", "--invoke-from", help="Change directory that script is invoked from")
 
-    args = mod_parser.parse_args(mod_args[1:])
+    args = mod_parser.parse_args(mod_args)
     tool = shed.take(args.script)
 
     if not tool:
@@ -75,11 +76,25 @@ def _(mod_args):
         except exceptions.InvokeDirectoryNotFound:
             print("Invoke-from directory \"{}\" is not a valid directory or does not exist. directory not updated.")
 
-    shed.put(tool)
+    shed.put(tool, args.text)
 
 
 
 
 @command_dispatcher.register('toss')
 def _(toss_args):
-    pass
+    toss_parser = argparse.ArgumentParser("Remove a tool from the shed.")
+    toss_parser.add_argument("script", help="name of the tool to remove.")
+    args = argparse.ArgumentParser(toss_args)
+
+    removed = shed.toss(args.script)
+    if not removed:
+        print("No script {} exists in the shed. Nothing removed.")
+
+
+@command_dispatcher('find')
+def _(find_args):
+    find_parser = argparse.ArgumentParser("Search for a tool.")
+    find_parser.add_argument('-t', '--tags', nargs='+', help="tags to search for")
+    find_parser.add_argument('-n', '--name', help="search for a tool by its name.")
+
