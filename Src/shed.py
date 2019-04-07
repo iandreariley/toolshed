@@ -10,9 +10,18 @@ the_shed = TinyDB(os.path.join(HOME, 'toolrack.json'))
 tool_rack = the_shed.table('tools')
 
 
-def put(tool: tools.Tool):
+def put(tool: tools.Tool, text: str=None):
     tool_spot = Query()
     tool_rack.upsert(tool.to_dict(), tool_spot.script == tool.script)
+
+    # "text" is a file that should be used to replace the current script
+    if text is not None:
+        shed_copy = os.path.join(HOME, tool.script)
+        try:
+            shutil.copyfile(text, shed_copy)
+        except FileNotFoundError as e:
+            raise exceptions.ScriptNotFound("Text not replaced. Could not copy {} into {} because {} does not exist.."
+                                            .format(text, tool.script, text)) from e
 
 
 def take(script):
@@ -30,7 +39,7 @@ def take(script):
 
 def toss(script):
     tool_spot = Query()
-    results = tool_rack.search(tool_spot.script == script)
+    results = tool_rack.remove(tool_spot.script == script)
     return results
 
 
