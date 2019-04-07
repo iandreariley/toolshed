@@ -39,7 +39,7 @@ handle_output = ToolTypeDispatcher()
 
 @handle_output.register('python')
 def _(output):
-    logger.debug('python handler: input={}'.format(output))
+    logger.debug('python handler: subprocess output: {}'.format(output))
     if output.returncode == 2:
         raise exceptions.ScriptNotFound()
     return output
@@ -47,7 +47,7 @@ def _(output):
 
 @handle_output.register('sh')
 def _(output):
-    logger.debug('bash handler: input={}'.format(output))
+    logger.debug('bash handler: subprocess output: {}'.format(output))
     if output.returncode == 127:
         raise exceptions.ScriptNotFound()
     return output
