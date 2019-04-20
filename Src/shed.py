@@ -1,4 +1,5 @@
 """Storage for tools. That's it for now. 3-30-19"""
+import collections
 import os
 import tools
 import exceptions
@@ -11,8 +12,7 @@ tool_rack = the_shed.table('tools')
 
 
 def put(tool: tools.Tool, text: str=None):
-    tool_spot = Query()
-    tool_rack.upsert(tool.to_dict(), tool_spot.script == tool.script)
+    tool_rack.upsert(tool.to_dict(), Query().script == tool.script)
 
     # "text" is a file that should be used to replace the current script
     if text is not None:
@@ -26,15 +26,10 @@ def put(tool: tools.Tool, text: str=None):
 
 def take(script):
     tool_spot = Query()
-    results = tool_rack.search(tool_spot.script == script)
+    result = tool_rack.get(tool_spot.script == script)
 
-    if len(results) > 1:
-        raise exceptions.DuplicateTool()
-
-    try:
-        return tools.Tool.from_json(results[0])
-    except IndexError:
-        return None
+    if result:
+        return tools.Tool.from_json(result)
 
 
 def toss(script):
@@ -43,15 +38,20 @@ def toss(script):
     return results
 
 
-def new_tool(path, invocation, tags):
-    if not os.path.isfile(path):
-        raise exceptions.InvalidTool()
-
+def make(path, invocation, tags):
     _, script = os.path.split(path)
-    shed_copy = os.path.join(HOME, script)
-    shutil.copyfile(path, shed_copy)
 
-    # TODO: Check if tags are in known tags.
+    if tool_rack.contains(Query().script == script):
+        raise exceptions.DuplicateTool()
 
     tool = tools.Tool(script, invocation, tags)
-    put(tool)
+    put(tool, path)
+
+
+def find(name: str=None, tags: "iterable"=()):
+    tool = Query()
+
+    if name:
+        return tool_rack.search((tool.name == name) & (tool.tags.all(tags)))
+    else:
+        return tool_rack.search(tool.tags.all(tags))
