@@ -2,7 +2,6 @@
 
 
 class Dispatcher(object):
-
     def __init__(self, key: callable=None, default: callable=None):
         self.registry = {}
         self.key = key or self.pass_through
