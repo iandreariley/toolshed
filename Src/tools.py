@@ -33,6 +33,9 @@ class Tool:
         if not os.path.isfile(script_path):
             raise exceptions.ScriptNotFound()
 
+        if not self.invocation:
+            raise exceptions.NoInvocationFound()
+
         return script_handlers.handle_output(subprocess.run([self.invocation, script_path] + args))
 
     def to_dict(self):

@@ -48,7 +48,7 @@ def make(path, invocation, tags):
     put(tool, path)
 
 
-def find(name: str=None, tags: "iterable"=()):
+def find(name: str=None, tags: tuple=()):
     tool = Query()
 
     if name:

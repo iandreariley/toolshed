@@ -16,3 +16,7 @@ class InvalidTool(ValueError):
 
 class InvalidInvocation(ValueError):
     pass
+
+
+class NoInvocationFound(TypeError):
+    pass

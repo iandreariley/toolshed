@@ -19,7 +19,8 @@ def _(add_args):
     add_parser = argparse.ArgumentParser("Add a tool to the shed")
     add_parser.add_argument("script_path", help="Current path of the tool you want to add. Tool shed will make its "
                                                 "own copy.")
-    add_parser.add_argument("invocation", help="How to invoke this script. E.g. 'python my_awesome_python.py'")
+    add_parser.add_argument("-i", "--invocation", help="How to invoke this script. E.g. 'python my_awesome_python.py'",
+                            default=None)
     add_parser.add_argument("-t", "--tags", nargs="?", help="Searchable tags to know your tools by.")
 
     args = add_parser.parse_args(add_args[1:])
@@ -31,17 +32,31 @@ def _(use_args):
     use_parser = argparse.ArgumentParser("User a tool.")
     use_parser.add_argument("script", help="filename (not full path) of tool to execute")
     use_parser.add_argument("-a", "--args", nargs="*", help="arguments to pass to the script", default=[])
+    use_parser.add_argument("-i", "--invocation", help="How to invoke the tool", default=None)
     args = use_parser.parse_args(use_args[1:])
 
     tool = shed.take(args.script)
+
+    if not tool:
+        print('Could not find any tool named "{}" in the shed.'.format(args.script))
+        return
+
+    if args.invocation:
+        tool.invocation = args.invocation
+
     try:
         tool.invoke(args.args)
     except exceptions.ScriptNotFound:
-        print('Whoops. No tool named "{}" in the shed'.format(args.script))
+        print('Whoops. There is a record of {}, however the script could not be found in {}'.format(args.script,
+                                                                                                    shed.HOME))
+    except exceptions.NoInvocationFound:
+        print('Toolshed does not know how to invoke {}. Either add an invocation (use "mod"), or pass one with the '
+              '"-i" option.'.format(args.script))
 
 
 @command_dispatcher.register('mod')
 def _(mod_args):
+    """"Mod" command. Allows user to update the tool (change script, add / remove tags, etc.)"""
     mod_parser = argparse.ArgumentParser("Modify a tool.")
     mod_parser.add_argument("script", help="Tool to modify.")
     mod_parser.add_argument("-u", "--text", help="Path of file to replace the existing script with.")
@@ -84,7 +99,7 @@ def _(mod_args):
 def _(toss_args):
     toss_parser = argparse.ArgumentParser("Remove a tool from the shed.")
     toss_parser.add_argument("script", help="name of the tool to remove.")
-    args = toss_parser.parse_args(toss_args)
+    args = toss_parser.parse_args(toss_args[1:])
 
     removed = shed.toss(args.script)
     if not removed:
