@@ -1,6 +1,5 @@
 import argparse
 import logging
-import pprint
 import sys
 from cli import command_dispatcher
 
