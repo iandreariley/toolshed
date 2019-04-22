@@ -1,12 +1,12 @@
 """
 Tool represents some kind of code utility. It should be executable. That's it for now. 3-30-19
 """
-import os
-import shed
-import json
-import script_handlers
-import subprocess
 import logging
+import os
+import subprocess
+
+import shed
+import script_handlers
 import exceptions
 
 logger = logging.getLogger("project")

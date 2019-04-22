@@ -1,4 +1,5 @@
 import argparse
+
 import exceptions
 import shed
 import utils
@@ -16,6 +17,7 @@ command_dispatcher.key = lambda x: x[0]
 
 @command_dispatcher.register('make')
 def _(add_args):
+    """"Make" command. Used to add tools to the shed."""
     add_parser = argparse.ArgumentParser("Add a tool to the shed")
     add_parser.add_argument("script_path", help="Current path of the tool you want to add. Tool shed will make its "
                                                 "own copy.")
@@ -29,6 +31,7 @@ def _(add_args):
 
 @command_dispatcher.register('use')
 def _(use_args):
+    """"Use" command. Executes a tool with the provided arguments. Invocation can also be passed."""
     use_parser = argparse.ArgumentParser("User a tool.")
     use_parser.add_argument("script", help="filename (not full path) of tool to execute")
     use_parser.add_argument("-a", "--args", nargs="*", help="arguments to pass to the script", default=[])
@@ -97,6 +100,7 @@ def _(mod_args):
 
 @command_dispatcher.register('toss')
 def _(toss_args):
+    """"Toss" command. Removes a tool permanently from the shed."""
     toss_parser = argparse.ArgumentParser("Remove a tool from the shed.")
     toss_parser.add_argument("script", help="name of the tool to remove.")
     args = toss_parser.parse_args(toss_args[1:])
@@ -108,6 +112,8 @@ def _(toss_args):
 
 @command_dispatcher.register('find')
 def _(find_args):
+    """"Find" command. Search by name and / or tags. Tags may be multiple and are search with a logical AND (i.e.
+    matches must contain all tags listed)."""
     find_parser = argparse.ArgumentParser("Search for a tool.")
     find_parser.add_argument('-t', '--tags', nargs='+', help="tags to search for", default=())
     find_parser.add_argument('-n', '--name', help="search for a tool by its name.")

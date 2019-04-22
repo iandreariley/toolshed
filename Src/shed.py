@@ -1,10 +1,11 @@
 """Storage for tools. That's it for now. 3-30-19"""
-import collections
 import os
-import tools
-import exceptions
 import shutil
+
 from tinydb import TinyDB, Query
+
+import exceptions
+import tools
 
 HOME = os.path.join(os.path.expanduser('~'), '.toolshed')
 the_shed = TinyDB(os.path.join(HOME, 'toolrack.json'))
@@ -12,6 +13,7 @@ tool_rack = the_shed.table('tools')
 
 
 def put(tool: tools.Tool, text: str=None):
+    """Adds tool if it doesn't exist, or updates it if it does."""
     tool_rack.upsert(tool.to_dict(), Query().script == tool.script)
 
     # "text" is a file that should be used to replace the current script
@@ -25,6 +27,7 @@ def put(tool: tools.Tool, text: str=None):
 
 
 def take(script):
+    """A getter. Returns the tool specified by the script name, which should be unique."""
     tool_spot = Query()
     result = tool_rack.get(tool_spot.script == script)
 
@@ -33,12 +36,14 @@ def take(script):
 
 
 def toss(script):
+    """Remove tool identified by "script"."""
     tool_spot = Query()
     results = tool_rack.remove(tool_spot.script == script)
     return results
 
 
 def make(path, invocation, tags):
+    """Create a new tool in the shed."""
     _, script = os.path.split(path)
 
     if tool_rack.contains(Query().script == script):
@@ -49,6 +54,7 @@ def make(path, invocation, tags):
 
 
 def find(name: str=None, tags: tuple=()):
+    """Query tools by name and / or tags."""
     tool = Query()
 
     if name:

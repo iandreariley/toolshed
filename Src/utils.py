@@ -1,7 +1,5 @@
-"""For doing single dispatch across arbitrary keys ... which we seem to do a lot of in this program."""
-
-
 class Dispatcher(object):
+    """For doing single dispatch across arbitrary keys ... which we seem to do a lot of in this program."""
     def __init__(self, key: callable=None, default: callable=None):
         self.registry = {}
         self.key = key or self.pass_through
