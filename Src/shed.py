@@ -1,4 +1,5 @@
 """Storage for tools. That's it for now. 3-30-19"""
+import logging
 import os
 import shutil
 
@@ -8,6 +9,13 @@ import exceptions
 import tools
 
 HOME = os.path.join(os.path.expanduser('~'), '.toolshed')
+logger = logging.getLogger("project")
+
+# Create home directory if it doesn't exist
+logger.debug("Creating toolshed home folder \"{}\".".format(HOME))
+os.makedirs(HOME, exist_ok=True)
+
+# Setup database
 the_shed = TinyDB(os.path.join(HOME, 'toolrack.json'))
 tool_rack = the_shed.table('tools')
 
