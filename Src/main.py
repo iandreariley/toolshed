@@ -1,26 +1,15 @@
 import argparse
-import logging
-import os
 import sys
 
-import shed
-from cli import command_dispatcher
+import cli
+import loggers
 
 
 def run():
-    logger = logging.getLogger("project")
-    logger.setLevel(logging.DEBUG)
-    handler = logging.StreamHandler(sys.stdout)
-    handler.setLevel(logging.DEBUG)
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
-
-    # Create home directory if it doesn't exist
-    os.makedirs(shed.HOME, exist_ok=True)
-
+    logger = loggers.get_module_logger(__name__)
     parser = argparse.ArgumentParser("A place to save your dev tools so you don't have to make them all over again.")
-    actions = command_dispatcher.registry.keys()
-    parser.add_argument('action', help='Choose from these actions', choices=list(actions))
-    command_dispatcher(sys.argv[1:])
+    actions = cli.command_dispatcher.registry.keys()
 
+    logger.debug("Parsing arguments in {}.{}".format(__name__, run.__name__))
+    parser.add_argument('action', help='Choose from these actions', choices=list(actions))
+    cli.command_dispatcher(sys.argv[1:])
