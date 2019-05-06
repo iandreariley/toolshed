@@ -8,21 +8,31 @@ import exceptions
 import loggers
 import tools
 
-HOME = os.path.join(os.path.expanduser('~'), '.toolshed')
-logger = loggers.get_module_logger(__name__)
+
+"""Module initialization"""
+module_logger = loggers.get_child_logger(__name__)
 
 # Create home directory if it doesn't exist
-logger.debug("Creating toolshed home folder \"{}\".".format(HOME))
-os.makedirs(HOME, exist_ok=True)
+HOME = os.path.join(os.path.expanduser('~'), '.toolshed')
+
+if not os.path.exists(HOME):
+    module_logger.debug("Creating toolshed home folder \"{}\".".format(HOME))
+    os.makedirs(HOME, exist_ok=True)
+    module_logger.debug("Finished creating toolshed home folder.")
 
 # Setup database
+module_logger.debug("Setting up database and tool table.")
 the_shed = tinydb.TinyDB(os.path.join(HOME, 'toolrack.json'))
 tool_rack = the_shed.table('tools')
+module_logger.debug("Finished setting up database and tool table.")
 
 
 def put(tool: tools.Tool, text: str=None):
     """Adds tool if it doesn't exist, or updates it if it does."""
+    logger = loggers.get_child_logger(__name__, put.__name__)
+    logger.debug("Upserting with the arguments: tool={}; text={}".format(tool, text))
     tool_rack.upsert(tool.to_dict(), tinydb.Query().script == tool.script)
+    logger.debug("Finished upsert.")
 
     # "text" is a file that should be used to replace the current script
     if text is not None:
@@ -63,9 +73,12 @@ def make(path, invocation, tags):
 
 def find(name: str=None, tags: tuple=()):
     """Query tools by name and / or tags."""
+    logger = loggers.get_child_logger(__name__, find.__name__)
     tool = tinydb.Query()
 
     if name:
+        logger.debug('Recieved name argument. Searching for: name={}, tags={}'.format(name, tags))
         return tool_rack.search((tool.name == name) & (tool.tags.all(tags)))
     else:
+        logger.debug('Did not recieve name argument. Searching for: tags={}'.format(tags))
         return tool_rack.search(tool.tags.all(tags))

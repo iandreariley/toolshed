@@ -10,13 +10,13 @@ handler.setLevel(logging.DEBUG)
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 handler.setFormatter(formatter)
 project_logger.addHandler(handler)
-logging_logger = logging.getLogger('toolshed.' + __name__)
-logging_logger.debug('finished logging setup.')
+module_logger = logging.getLogger('toolshed.' + __name__)
+module_logger.debug('finished logging setup.')
 
 
-def get_module_logger(name: str):
+def get_child_logger(*names: str):
     """Returns a child logger of the project-level logger with the name toolshed.<name>."""
-    return logging.getLogger("toolshed." + name)
+    return logging.getLogger("toolshed." + '.'.join(names))
 
 
 # def log_inputs(logger: logging.Logger, log_level: int=logging.DEBUG):
