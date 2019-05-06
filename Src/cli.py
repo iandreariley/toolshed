@@ -14,6 +14,8 @@ command_dispatcher = utils.Dispatcher()
 command_dispatcher.default = unknown_command
 command_dispatcher.key = lambda x: x[0]
 
+the_shed = shed.Shed()
+
 
 @command_dispatcher.register('make')
 def _(add_args):
@@ -26,7 +28,7 @@ def _(add_args):
     add_parser.add_argument("-t", "--tags", nargs="?", help="Searchable tags to know your tools by.")
 
     args = add_parser.parse_args(add_args[1:])
-    shed.make(args.script_path, args.invocation, args.tags)
+    the_shed.make(args.script_path, args.invocation, args.tags)
 
 
 @command_dispatcher.register('use')
@@ -38,7 +40,7 @@ def _(use_args):
     use_parser.add_argument("-i", "--invocation", help="How to invoke the tool", default=None)
     args = use_parser.parse_args(use_args[1:])
 
-    tool = shed.take(args.script)
+    tool = the_shed.take(args.script)
 
     if not tool:
         print('Could not find any tool named "{}" in the shed.'.format(args.script))
@@ -51,7 +53,7 @@ def _(use_args):
         tool.invoke(args.args)
     except exceptions.ScriptNotFound:
         print('Whoops. There is a record of {}, however the script could not be found in {}'.format(args.script,
-                                                                                                    shed.HOME))
+                                                                                                    the_shed.home))
     except exceptions.NoInvocationFound:
         print('Toolshed does not know how to invoke {}. Either add an invocation (use "mod"), or pass one with the '
               '"-i" option.'.format(args.script))
@@ -70,7 +72,7 @@ def _(mod_args):
     mod_parser.add_argument("-d", "--invoke-from", help="Change directory that script is invoked from")
 
     args = mod_parser.parse_args(mod_args[1:])
-    tool = shed.take(args.script)
+    tool = the_shed.take(args.script)
 
     if not tool:
         print("No tool \"{}\" found in the shed.".format(args.script))
@@ -95,7 +97,7 @@ def _(mod_args):
         except exceptions.InvokeDirectoryNotFound:
             print("Invoke-from directory \"{}\" is not a valid directory or does not exist. directory not updated.")
 
-    shed.put(tool, args.text)
+    the_shed.put(tool, args.text)
 
 
 @command_dispatcher.register('toss')
@@ -105,7 +107,7 @@ def _(toss_args):
     toss_parser.add_argument("script", help="name of the tool to remove.")
     args = toss_parser.parse_args(toss_args[1:])
 
-    removed = shed.toss(args.script)
+    removed = the_shed.toss(args.script)
     if not removed:
         print("No script {} exists in the shed. Nothing removed.")
 
@@ -119,7 +121,7 @@ def _(find_args):
     find_parser.add_argument('-n', '--name', help="search for a tool by its name.")
 
     args = find_parser.parse_args(find_args[1:])
-    results = shed.find(name=args.name, tags=args.tags)
+    results = the_shed.find(name=args.name, tags=args.tags)
     found = sorted(tools.Tool.from_json(r).script for r in results)
 
     if found:
