@@ -1,9 +1,9 @@
 import argparse
 
-import exceptions
-import shed
-import utils
-import tools
+import toolshed.exceptions as exceptions
+import toolshed.shed as shed
+import toolshed.utils as utils
+import toolshed.tools as tools
 
 
 def unknown_command(command: str):

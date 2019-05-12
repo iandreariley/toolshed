@@ -1,7 +1,7 @@
 import logging
 
-import exceptions
-import utils
+import toolshed.exceptions as exceptions
+import toolshed.utils as utils
 
 logger = logging.getLogger("project")
 

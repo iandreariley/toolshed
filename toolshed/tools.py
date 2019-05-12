@@ -5,9 +5,9 @@ import logging
 import os
 import subprocess
 
-import shed
-import script_handlers
-import exceptions
+import toolshed.shed as shed
+import toolshed.script_handlers as script_handlers
+import toolshed.exceptions as exceptions
 
 logger = logging.getLogger("project")
 

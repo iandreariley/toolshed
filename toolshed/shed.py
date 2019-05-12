@@ -4,9 +4,9 @@ import shutil
 
 import tinydb
 
-import exceptions
-import loggers
-import tools
+import toolshed.exceptions as exceptions
+import toolshed.loggers as loggers
+import toolshed.tools as tools
 
 
 class Shed:
@@ -84,12 +84,19 @@ class Shed:
                 logger.debug('Did not recieve name argument. Searching for: tags={}'.format(tags))
                 return self._tool_rack.search(tool.tags.all(tags))
 
+        def close(self):
+            self._db.close()
+
         @property
         def home(self):
             return self._home
 
         @home.setter
         def home(self, _home: str):
+            if _home == self._home:
+                return
+
+            self._db.close()
             self._home = _home
 
             try:
@@ -101,13 +108,13 @@ class Shed:
             self._db = tinydb.TinyDB(os.path.join(self._home, 'toolrack.json'))
             self._tool_rack = self._db.table('tools')
 
-    singleton = None
+    __singleton = None
 
     def __init__(self, home: str=None):
-        if not Shed.singleton:
-            Shed.singleton = Shed.__Shed(home)
+        if not Shed.__singleton:
+            Shed.__singleton = Shed.__Shed(home)
         else:
-            Shed.singleton.home = home
+            Shed.__singleton.home = home
 
     def __getattr__(self, item):
-        return getattr(self.singleton, item)
+        return getattr(self.__singleton, item)

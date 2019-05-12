@@ -1,22 +1,23 @@
 import os
-import shutil
+import tempfile
 import unittest
 
-import shed
-
-
-TEST_HOME_DIR = os.path.join(os.getcwd() + "tmp")
+import toolshed.shed as shed
 
 
 class ShedTestCase(unittest.TestCase):
 
-    @classmethod
-    def setUpClass(cls):
-        os.makedirs(TEST_HOME_DIR, exist_ok=True)
+    def setUp(self):
+        self.home_dir = tempfile.TemporaryDirectory()
+        self.the_shed = shed.Shed(self.home_dir.name)
+
+    def tearDown(self):
+        self.the_shed.close()
+        self.home_dir.cleanup()
 
     def test_shed_makes_home_dir_if_not_exists(self):
         # Setup
-        home_dir = os.path.join(TEST_HOME_DIR, 'test_home')
+        home_dir = os.path.join(self.home_dir.name, 'test_home')
         assert not os.path.isdir(home_dir)
 
         # Execute: calling the Shed constructor should make the directory
@@ -25,9 +26,15 @@ class ShedTestCase(unittest.TestCase):
         # Assert
         self.assertTrue(os.path.isdir(home_dir))
 
-    @classmethod
-    def tearDownClass(cls):
-        shutil.rmtree(TEST_HOME_DIR)
+    def test_shed_makes_copy(self):
+        # Setup
+        script = tempfile.NamedTemporaryFile()
+        _, tmp_filename = os.path.split(script.name)
+        # Execute
+        self.the_shed.make(script.name, None, None)
+
+        # Assert
+        self.assertTrue(os.path.isfile(os.path.join(self.home_dir.name, tmp_filename)))
 
 
 if __name__ == '__main__':
