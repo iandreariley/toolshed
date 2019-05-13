@@ -7,5 +7,9 @@ setup(
     entry_points={
         'console_scripts': ['toolshed=toolshed.main:run']
     },
-    packages=find_packages()
+    packages=['toolshed'],
+    dependencies=['tinydb'],
+    url='https://github.com/iandreariley/toolshed.git',
+    license='MIT',
+    zip_safe=False
 )
