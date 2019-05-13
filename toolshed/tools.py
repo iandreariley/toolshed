@@ -5,10 +5,7 @@ import logging
 import os
 import subprocess
 
-import toolshed.shed as shed
-import toolshed.script_handlers as script_handlers
-import toolshed.exceptions as exceptions
-
+import toolshed
 logger = logging.getLogger("project")
 
 
@@ -17,7 +14,7 @@ class Tool:
     def __init__(self, script, invocation=None, invoke_from=None, tags=None):
         self._script = script
         self.invocation = invocation
-        self._invoke_from = invoke_from or shed.HOME
+        self._invoke_from = invoke_from or toolshed.HOME
         self.tags = tags or []
 
     def invoke(self, args):
@@ -26,17 +23,17 @@ class Tool:
         try:
             os.chdir(self._invoke_from)
         except FileNotFoundError as e:
-            raise exceptions.InvokeDirectoryNotFound() from e
+            raise toolshed.InvokeDirectoryNotFound() from e
 
-        script_path = os.path.join(shed.HOME, self._script)
+        script_path = os.path.join(toolshed.HOME, self._script)
 
         if not os.path.isfile(script_path):
-            raise exceptions.ScriptNotFound()
+            raise toolshed.ScriptNotFound()
 
         if not self.invocation:
-            raise exceptions.NoInvocationFound()
+            raise toolshed.NoInvocationFound()
 
-        return script_handlers.handle_output(subprocess.run([self.invocation, script_path] + args))
+        return toolshed.handle_output(subprocess.run([self.invocation, script_path] + args))
 
     def to_dict(self):
         return {
@@ -53,7 +50,7 @@ class Tool:
     @invoke_from.setter
     def invoke_from(self, invoke_from):
         if not os.path.isdir(invoke_from):
-            raise exceptions.InvokeDirectoryNotFound()
+            raise toolshed.InvokeDirectoryNotFound()
         self._invoke_from = invoke_from
 
     @property
@@ -62,8 +59,8 @@ class Tool:
 
     @script.setter
     def script(self, script):
-        if not os.path.exists(os.path.join(shed.HOME, script)):
-            raise exceptions.ScriptNotFound()
+        if not os.path.exists(os.path.join(toolshed.HOME, script)):
+            raise toolshed.ScriptNotFound()
         self._script = script
 
     @staticmethod

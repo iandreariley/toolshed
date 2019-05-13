@@ -21,5 +21,6 @@ class InvalidInvocation(ValueError):
 class NoInvocationFound(TypeError):
     pass
 
+
 class InvalidHomeDirectory(ValueError):
     pass

@@ -1,20 +1,17 @@
 import argparse
 
-import toolshed.exceptions as exceptions
-import toolshed.shed as shed
-import toolshed.utils as utils
-import toolshed.tools as tools
+import toolshed
 
 
 def unknown_command(command: str):
     print('unknown command {}. Available commands are {}.'.format(command, list(command_dispatcher.registry.keys())))
 
 
-command_dispatcher = utils.Dispatcher()
+command_dispatcher = toolshed.Dispatcher()
 command_dispatcher.default = unknown_command
 command_dispatcher.key = lambda x: x[0]
 
-the_shed = shed.Shed()
+the_shed = toolshed.Shed()
 
 
 @command_dispatcher.register('make')
@@ -51,10 +48,10 @@ def _(use_args):
 
     try:
         tool.invoke(args.args)
-    except exceptions.ScriptNotFound:
+    except toolshed.ScriptNotFound:
         print('Whoops. There is a record of {}, however the script could not be found in {}'.format(args.script,
                                                                                                     the_shed.home))
-    except exceptions.NoInvocationFound:
+    except toolshed.NoInvocationFound:
         print('Toolshed does not know how to invoke {}. Either add an invocation (use "mod"), or pass one with the '
               '"-i" option.'.format(args.script))
 
@@ -94,7 +91,7 @@ def _(mod_args):
     if args.invoke_from:
         try:
             tool.invoke_from = args.invoke_from
-        except exceptions.InvokeDirectoryNotFound:
+        except toolshed.InvokeDirectoryNotFound:
             print("Invoke-from directory \"{}\" is not a valid directory or does not exist. directory not updated.")
 
     the_shed.put(tool, args.text)
@@ -122,7 +119,7 @@ def _(find_args):
 
     args = find_parser.parse_args(find_args[1:])
     results = the_shed.find(name=args.name, tags=args.tags)
-    found = sorted(tools.Tool.from_json(r).script for r in results)
+    found = sorted(toolshed.Tool.from_json(r).script for r in results)
 
     if found:
         print("Results:")

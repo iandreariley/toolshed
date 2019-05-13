@@ -4,9 +4,7 @@ import shutil
 
 import tinydb
 
-import toolshed.exceptions as exceptions
-import toolshed.loggers as loggers
-import toolshed.tools as tools
+import toolshed
 
 
 class Shed:
@@ -20,20 +18,20 @@ class Shed:
             """Initialize the shed
             :param home: path of the home directory that shed will use for storing scripts & metadata."""
 
-            self._home = home or os.path.join(os.path.expanduser('~'), '.toolshed')
+            self._home = home or toolshed.HOME
 
             try:
                 os.makedirs(self._home, exist_ok=True)
             except Exception as e:
-                raise exceptions.InvalidHomeDirectory('Can\'t find or create home directory "{}".'.format(self._home))\
+                raise toolshed.InvalidHomeDirectory('Can\'t find or create home directory "{}".'.format(self._home))\
                     from e
 
             self._db = tinydb.TinyDB(os.path.join(self._home, 'toolrack.json'))
             self._tool_rack = self._db.table('tools')
 
-        def put(self, tool: tools.Tool, text: str=None):
+        def put(self, tool: toolshed.Tool, text: str=None):
             """Adds tool if it doesn't exist, or updates it if it does."""
-            logger = loggers.get_child_logger(__name__, Shed.__name__, self.__class__.__name__, self.put.__name__)
+            logger = toolshed.get_child_logger(__name__, Shed.__name__, self.__class__.__name__, self.put.__name__)
             logger.debug("Upserting with the arguments: tool={}; text={}".format(tool, text))
             self._tool_rack.upsert(tool.to_dict(), tinydb.Query().script == tool.script)
             logger.debug("Finished upsert.")
@@ -44,7 +42,7 @@ class Shed:
                 try:
                     shutil.copyfile(text, shed_copy)
                 except FileNotFoundError as e:
-                    raise exceptions.ScriptNotFound(
+                    raise toolshed.ScriptNotFound(
                         "Text not replaced. Could not copy {} into {} because {} does not exist..".format(
                             text, tool.script, text)) from e
 
@@ -54,7 +52,7 @@ class Shed:
             result = self._tool_rack.get(tool_spot.script == script)
 
             if result:
-                return tools.Tool.from_json(result)
+                return toolshed.Tool.from_json(result)
 
         def toss(self, script):
             """Remove tool identified by "script"."""
@@ -67,14 +65,14 @@ class Shed:
             _, script = os.path.split(path)
 
             if self._tool_rack.contains(tinydb.Query().script == script):
-                raise exceptions.DuplicateTool()
+                raise toolshed.DuplicateTool()
 
-            tool = tools.Tool(script, invocation, tags)
+            tool = toolshed.Tool(script, invocation, tags)
             self.put(tool, path)
 
         def find(self, name: str=None, tags: tuple=()):
             """Query tools by name and / or tags."""
-            logger = loggers.get_child_logger(__name__, Shed.__name__, self.__class__.__name__, self.put.__name__)
+            logger = toolshed.get_child_logger(__name__, Shed.__name__, self.__class__.__name__, self.put.__name__)
             tool = tinydb.Query()
 
             if name:
@@ -102,7 +100,7 @@ class Shed:
             try:
                 os.makedirs(self._home, exist_ok=True)
             except Exception as e:
-                raise exceptions.InvalidHomeDirectory('Can\'nt find or create home directory "{}".'.format(self._home))\
+                raise toolshed.InvalidHomeDirectory('Can\'nt find or create home directory "{}".'.format(self._home))\
                     from e
 
             self._db = tinydb.TinyDB(os.path.join(self._home, 'toolrack.json'))

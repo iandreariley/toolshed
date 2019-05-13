@@ -1,7 +1,6 @@
 import logging
 
-import toolshed.exceptions as exceptions
-import toolshed.utils as utils
+import toolshed
 
 logger = logging.getLogger("project")
 
@@ -17,7 +16,7 @@ def tool_key(tool_output):
     return tool_output.args[0]
 
 
-handle_output = utils.Dispatcher(tool_key, default_call)
+handle_output = toolshed.Dispatcher(tool_key, default_call)
 
 
 @handle_output.register('python')
@@ -25,7 +24,7 @@ def _(output):
     """Handle the output of a python process."""
     logger.debug('python handler: subprocess output: {}'.format(output))
     if output.returncode == 2:
-        raise exceptions.ScriptNotFound()
+        raise toolshed.ScriptNotFound()
     return output
 
 
@@ -34,5 +33,5 @@ def _(output):
     """Handle the output of a bash process."""
     logger.debug('bash handler: subprocess output: {}'.format(output))
     if output.returncode == 127:
-        raise exceptions.ScriptNotFound()
+        raise toolshed.ScriptNotFound()
     return output
