@@ -1,4 +1,17 @@
+# Cached bytecode
 __pycache__/
-main.egg-info/
+
+# "egg" output of pip install etc.
+/*.egg-info/
+
+# More output of setuptools install.
+/dist/
+
+# Yet more possible setuptools output. Does it ever end?
+/build/
+
+# Some MacOS thing
 .DS_Store
+
+# Pycharm metadata
 .idea
