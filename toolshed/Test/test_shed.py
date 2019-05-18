@@ -97,7 +97,7 @@ class ShedTestCase(unittest.TestCase):
             '{1}'.format(script_filename, name_results))
 
     def assertResultsEqual(self, actual_results, expected_results, message):
-        self.assertSetEqual(set(a['script'] for a in actual_results), expected_results)
+        self.assertSetEqual(set(a['script'] for a in actual_results), expected_results, message)
 
     @staticmethod
     def _get_temp_file_name(script: tempfile.NamedTemporaryFile):
