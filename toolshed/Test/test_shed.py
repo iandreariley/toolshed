@@ -131,6 +131,40 @@ class ShedTestCase(unittest.TestCase):
         self.assertIsNone(result, 'shed.take should have returned None for non-existent script "{}", but returned '
                                   '{} instead'.format(bogus_filename, repr(result)))
 
+    def test_put_updatesExistingScript(self):
+        # Setup
+        _, script_filename = self._make_named_temp_file()
+        tool = self.the_shed.take(script_filename)
+        tags = ['test_tag']
+        tool.tags = tags
+
+        # Execute
+        self.the_shed.put(tool)
+
+        # Assert
+        tool = self.the_shed.take(script_filename)
+        self.assertSetEqual(set(tool.tags), set(tags), "shed.put should update tool {} to have tags {}, but instead "
+                                                       "tags were {}".format(script_filename, tags, tool.tags))
+
+    def test_put_updatesExistingText(self):
+        # Setup
+        _, script_filename = self._make_named_temp_file()
+        tool = self.the_shed.take(script_filename)
+        new_script = tempfile.NamedTemporaryFile()
+        test_text = 'Test text for put update.'
+
+        with open(new_script.name, 'w') as f:
+            f.write(test_text)
+
+        # Execute
+        self.the_shed.put(tool, new_script.name)
+
+        # Assert
+        with open(os.path.join(self.home_dir.name, script_filename), 'r') as f:
+            new_text = f.read()
+        self.assertMultiLineEqual(new_text, test_text, 'Script text should have been {} but was {} '
+                                                       'instead.'.format(repr(test_text), repr(new_text)))
+
     def assertResultsEqual(self, actual_results, expected_results, message):
         self.assertSetEqual(set(a['script'] for a in actual_results), expected_results, message)
 
