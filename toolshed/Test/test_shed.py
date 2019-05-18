@@ -4,6 +4,7 @@ import tempfile
 import unittest
 
 import toolshed.shed as shed
+import toolshed
 
 
 class ShedTestCase(unittest.TestCase):
@@ -164,6 +165,15 @@ class ShedTestCase(unittest.TestCase):
             new_text = f.read()
         self.assertMultiLineEqual(new_text, test_text, 'Script text should have been {} but was {} '
                                                        'instead.'.format(repr(test_text), repr(new_text)))
+
+    def test_put_raisesScriptNotFound_forMissingText(self):
+        # Setup
+        non_ext_script = 'test_raises'
+        t = toolshed.Tool(non_ext_script)
+
+        # Assert raises
+        with self.assertRaises(toolshed.ScriptNotFound):
+            self.the_shed.put(t, non_ext_script)
 
     def assertResultsEqual(self, actual_results, expected_results, message):
         self.assertSetEqual(set(a['script'] for a in actual_results), expected_results, message)
