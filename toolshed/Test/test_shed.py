@@ -106,6 +106,31 @@ class ShedTestCase(unittest.TestCase):
         # Assert
         self.assertTrue(not os.path.exists(os.path.join(self.home_dir.name, script_filename)))
 
+    def test_take_returnsNamedScript(self):
+        # Setup
+        _, script_filename = self._make_named_temp_file()
+
+        # Execute
+        result = self.the_shed.take(script_filename)
+
+        # Assert
+        self.assertIsNotNone(result, 'shed.take should have returned a tool with script name "{}" but returned None '
+                                     'instead.'.format(script_filename))
+        self.assertEqual(script_filename, result.script, 'shed.take should have returned a tool with script name "{}" '
+                                                         'but returned a script named "{}" '
+                                                         'instead'.format(script_filename, result.script))
+
+    def test_take_returnsNone_forNonexistentScript(self):
+        # Setup
+        bogus_filename = 'shouldnt_exist'
+
+        # Execute
+        result = self.the_shed.take(bogus_filename)
+
+        # Assert
+        self.assertIsNone(result, 'shed.take should have returned None for non-existent script "{}", but returned '
+                                  '{} instead'.format(bogus_filename, repr(result)))
+
     def assertResultsEqual(self, actual_results, expected_results, message):
         self.assertSetEqual(set(a['script'] for a in actual_results), expected_results, message)
 
