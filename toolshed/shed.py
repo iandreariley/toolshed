@@ -56,8 +56,20 @@ class Shed:
 
         def toss(self, script):
             """Remove tool identified by "script"."""
+            logger = toolshed.get_child_logger(__name__, Shed.__name__, self.__class__.__name__, self.toss.__name__)
             tool_spot = tinydb.Query()
+
+            # Remove from databases
             results = self._tool_rack.remove(tool_spot.script == script)
+
+            # Delete files
+            try:
+                os.remove(os.path.join(self._home, script))
+            except FileNotFoundError:
+                if results:
+                    logger.warn('While deleting {}, toolshed found that its metadata was in the database, but no such '
+                                'script existed in the home directory, "{}". It has now been removed from the '
+                                'database, but you may want to check that other files are not out of sync.')
             return results
 
         def make(self, path, invocation, tags):

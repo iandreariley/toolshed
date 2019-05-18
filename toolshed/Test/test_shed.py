@@ -96,6 +96,16 @@ class ShedTestCase(unittest.TestCase):
             'shed.find(name="{0}") should return script with name "{0}". Instead it returned '
             '{1}'.format(script_filename, name_results))
 
+    def test_toss_removes(self):
+        # Setup
+        _, script_filename = self._make_named_temp_file()
+
+        # Execute
+        self.the_shed.toss(script=script_filename)
+
+        # Assert
+        self.assertTrue(not os.path.exists(os.path.join(self.home_dir.name, script_filename)))
+
     def assertResultsEqual(self, actual_results, expected_results, message):
         self.assertSetEqual(set(a['script'] for a in actual_results), expected_results, message)
 
