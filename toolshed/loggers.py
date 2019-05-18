@@ -17,11 +17,3 @@ module_logger.debug('finished logging setup.')
 def get_child_logger(*names: str):
     """Returns a child logger of the project-level logger with the name toolshed.<name>."""
     return logging.getLogger("toolshed." + '.'.join(names))
-
-
-# def log_inputs(logger: logging.Logger, log_level: int=logging.DEBUG):
-#     """Logs inputs / outputs to the logger with the given name."""
-#
-#     def decorator(method):
-#         nonlocal logger, log_level
-#         logger.log(log_level, "")

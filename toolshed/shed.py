@@ -67,7 +67,7 @@ class Shed:
             if self._tool_rack.contains(tinydb.Query().script == script):
                 raise toolshed.DuplicateTool()
 
-            tool = toolshed.Tool(script, invocation, tags)
+            tool = toolshed.Tool(script, invocation=invocation, tags=tags)
             self.put(tool, path)
 
         def find(self, name: str=None, tags: tuple=()):
@@ -77,7 +77,7 @@ class Shed:
 
             if name:
                 logger.debug('Recieved name argument. Searching for: name={}, tags={}'.format(name, tags))
-                return self._tool_rack.search((tool.name == name) & (tool.tags.all(tags)))
+                return self._tool_rack.search((tool.script == name) & (tool.tags.all(tags)))
             else:
                 logger.debug('Did not recieve name argument. Searching for: tags={}'.format(tags))
                 return self._tool_rack.search(tool.tags.all(tags))

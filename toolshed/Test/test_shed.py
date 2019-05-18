@@ -1,3 +1,4 @@
+import collections.abc
 import os
 import tempfile
 import unittest
@@ -29,12 +30,85 @@ class ShedTestCase(unittest.TestCase):
     def test_shed_makes_copy(self):
         # Setup
         script = tempfile.NamedTemporaryFile()
-        _, tmp_filename = os.path.split(script.name)
+        tmp_filename = self._get_temp_file_name(script)
+
         # Execute
         self.the_shed.make(script.name, None, None)
 
         # Assert
         self.assertTrue(os.path.isfile(os.path.join(self.home_dir.name, tmp_filename)))
+
+    def test_find_withNoArguments_returnsAllScripts(self):
+        # Setup
+        tag = 'test_tag'
+        _, script_one_filename = self._make_named_temp_file(tags=[tag])
+        _, script_two_filename = self._make_named_temp_file(tags=[tag])
+
+        # expected result script names as set (ignore order)
+        expected_results = {script_one_filename, script_two_filename}
+
+        # Execute
+        all_results = self.the_shed.find()
+
+        # Assert
+        self.assertResultsEqual(
+            all_results, expected_results,
+            'shed.find() should return all results: {}, but returned {} '
+            'instead'.format(expected_results, all_results))
+
+    def test_find_withTagArgument_returnsTaggedScripts(self):
+        # Setup
+        tag = 'test_tag'
+
+        # Two files with the tag to be search for
+        _, script_one_filename = self._make_named_temp_file(tags=[tag])
+        _, script_two_filename = self._make_named_temp_file(tags=[tag])
+
+        # ... and one script without.
+        self._make_named_temp_file()
+
+        # expected result script names as set (ignore order)
+        expected_results = {script_one_filename, script_two_filename}
+
+        # Execute
+        tag_results = self.the_shed.find(tags=(tag,))
+
+        # Assert
+        self.assertResultsEqual(
+            tag_results, expected_results,
+            'shed.find(tags=["{}"]) should return the following scripts: {} but instead returned '
+            '{}.'.format(tag, expected_results, tag_results))
+
+    def test_find_withNameArgument_returnsNamedScript(self):
+        # Setup
+        tag = 'test_tag'
+        script_path, script_filename = self._make_named_temp_file(tags=[tag])
+
+        # Make one file with a different name to make sure it isn't returned.
+        self._make_named_temp_file()
+
+        # Execute
+        name_results = self.the_shed.find(name=script_filename)
+
+        # Assert
+        self.assertResultsEqual(
+            name_results, {script_filename},
+            'shed.find(name="{0}") should return script with name "{0}". Instead it returned '
+            '{1}'.format(script_filename, name_results))
+
+    def assertResultsEqual(self, actual_results, expected_results, message):
+        self.assertSetEqual(set(a['script'] for a in actual_results), expected_results)
+
+    @staticmethod
+    def _get_temp_file_name(script: tempfile.NamedTemporaryFile):
+        _, tmp_filename = os.path.split(script.name)
+        return tmp_filename
+
+    def _make_named_temp_file(self, tags: collections.abc.Iterable=tuple(), invocation: str=None):
+        script = tempfile.NamedTemporaryFile()
+        self.the_shed.make(script.name, tags=tags, invocation=invocation)
+        _, tmp_filename = os.path.split(script.name)
+        return script.name, tmp_filename
 
 
 if __name__ == '__main__':
